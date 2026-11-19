@@ -1,0 +1,77 @@
+---- LESSON 2: UNDERSTANDING THE INBOUND SHARES ----
+
+--1) Drop the sample data database
+DESC USER HJONES87;
+ALTER USER HJONES87
+SET DISPLAY_NAME = 'World Data Emporium';
+
+USE ROLE accountadmin;
+DROP DATABASE snowflake_sample_data;
+
+--2) exploring options 
+
+--set database name to original
+ALTER DATABASE "sample_data"
+RENAME TO "snowflake_sample_data";
+
+--3) Grant Imported Privileges to sysadmin for Snowflake_Sample_Data
+GRANT IMPORTED PRIVILEGES
+ON DATABASE snowflake_sample_data
+TO ROLE sysadmin;
+
+--4) What can you do with shared data?
+
+--check range of values in the Market Segment column
+SELECT distinct c_mktsegment
+FROM snowflake_sample_data.tpch_sf1.customer;
+
+--find out which markets have the most customers
+select 
+    c_mktsegment,
+    count(distinct C_CUSTKEY) as total_customers
+FROM snowflake_sample_data.tpch_sf1.customer
+GROUP BY c_mktsegment
+ORDER BY total_customers DESC;
+
+--join and aggregate shared data
+
+--nations table
+SELECT 
+    n_nationkey, 
+    n_name, 
+    n_regionkey
+FROM snowflake_sample_data.tpch_sf1.nation;
+
+--regions table
+SELECT
+    r_regionkey,
+    r_name
+FROM snowflake_sample_data.tpch_sf1.region;
+
+--join nations and region tables and sort
+SELECT
+    r_name AS region,
+    n_name AS nation
+FROM snowflake_sample_data.tpch_sf1.nation
+JOIN snowflake_sample_data.tpch_sf1.region
+    ON n_regionkey = r_regionkey
+ORDER BY r_name, n_name ASC;
+
+-- group and count rows per region
+SELECT
+    r_name AS region,
+    count(n_name) as num_countries
+FROM snowflake_sample_data.tpch_sf1.nation
+JOIN snowflake_sample_data.tpch_sf1.region
+    ON n_regionkey = r_regionkey
+GROUP BY r_name;
+
+--5) Set default and grant privileges
+
+
+
+
+
+
+
+
